@@ -56,49 +56,54 @@ class application {
 public:
 
 	game_of_life game;
+	
 	application() {
-		game.width = 4;
-		game.height = 4;
-		//for (int i = 0; i < game.width * game.height; i++) {
-		//	game.board.push_back(rand() % 3);
-		//}
-		game.board = { 0,1,0,0,
-			           1,0,0,1,
-			           1,0,0,1,
-			           0,0,1,0 };
+		game.width = 150;
+		game.height = 60;
+		for (int i = 0; i < game.width * game.height; i++) {
+			game.board.push_back(rand() % 3);
+		}
+		//game.board = { 0,1,0,0,
+		//	           1,0,0,1,
+		//	           1,0,0,1,
+		//	           0,0,1,0 };
 
 		for (int i = 0; i < game.width * game.height; i++) {
 			game.boardAfterSimulate.push_back(0);
 		}
 	}
+
+	void update_game_of_life(int start, int end) {
+		for (int i = start; i < end; i++) {
+			game.simulateCell(i);
+		}
+	}
 };
 
-class update_game_of_life {
+void test(application * app, int a, int b) {
+	app->update_game_of_life(a,b);
+}
 
-};
+void run(application * app) {
+	std::thread thr1(test, app, 0, app->game.board.size()/2);
+	std::thread thr2(test, app, app->game.board.size() / 2, app->game.board.size());
+	thr1.join();
+	thr2.join();
+}
 
 
 int main() {
 	application app;
-
+	
 	int a;
 	int x = 0;
-		while (x != 10) {
+		while (x != 100) {
 			app.game.printBoard();
-
-			for (int i = 0; i < 10; i++) {
-				app.game.simulateCell(i);
-			}
-
-			for (int i = 10; i < app.game.board.size(); i++) {
-				app.game.simulateCell(i);
-			}
-
+			run(&app);
 			app.game.board = app.game.boardAfterSimulate;
-			
-			//Sleep(500);
-			std::cout << "next" << std::endl;
-			std::cin >> a;
+			Sleep(100);
+			//std::cout << "next" << std::endl;
+			//std::cin >> a;
 			system("CLS");
 			x++;
 		}

@@ -3,6 +3,7 @@
 #include <chrono>
 #include <Windows.h>
 #include <thread>
+#include <functional>
 
 
 class game_of_life {
@@ -78,18 +79,21 @@ public:
 			game.simulateCell(i);
 		}
 	}
+
+	void run() {
+		
+		auto wrapper = std::mem_fn(&application::update_game_of_life);
+
+		std::thread thr1(wrapper(), 0, game.board.size() / 2);
+		std::thread thr2(wrapper,game.board.size() / 2, game.board.size());
+		thr1.join();
+		thr2.join();
+	}
 };
 
-void test(application * app, int a, int b) {
-	app->update_game_of_life(a,b);
-}
 
-void run(application * app) {
-	std::thread thr1(test, app, 0, app->game.board.size()/2);
-	std::thread thr2(test, app, app->game.board.size() / 2, app->game.board.size());
-	thr1.join();
-	thr2.join();
-}
+
+
 
 
 int main() {
@@ -99,7 +103,7 @@ int main() {
 	int x = 0;
 		while (x != 100) {
 			app.game.printBoard();
-			run(&app);
+			app.run();
 			app.game.board = app.game.boardAfterSimulate;
 			Sleep(100);
 			//std::cout << "next" << std::endl;
